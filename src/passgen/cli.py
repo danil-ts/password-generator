@@ -9,11 +9,14 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="passgen",
         description="Генератор надёжных случайных паролей",
+        add_help=False, 
     )
+
     p.add_argument(                 
         "-l", "--length",
         type=int,
         default=12,
+        metavar='',
         help="длина пароля (4–128 символов)",
     )
 
@@ -23,9 +26,24 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--no-digits",  action="store_true", help="исключить цифры")
     g.add_argument("--no-symbols", action="store_true", help="исключить спецсимволы")
     g.add_argument("--exclude-similar", action="store_true", help="исключить похожие символы 0 O I l 1")
+    
+    p.add_argument(
+    "-a", "--amount",
+    type=int,
+    default=1,
+    metavar='',
+    help="сколько паролей сгенерировать (по умолчанию 1)",
+    )
+
+    p.add_argument(
+    "-h", "--help",
+    action="help",
+    help="помощь", 
+    )
 
     p.add_argument("--copy", action="store_true",
                    help="скопировать пароль в буфер обмена")
+    
     return p
 
 def print_custom_help(parser: argparse.ArgumentParser) -> None:
@@ -56,10 +74,6 @@ def generate_once(args) -> str:
     )
 
 def merge_inline_flags(line: str, args, parser) -> bool:
-    """
-    Пытается распарсить `line` как аргументы CLI и обновить `args`.
-    Возвращает True, если параметры изменены, False если строка пуста.
-    """
     if not line:
         return False                     
     try:
@@ -74,7 +88,8 @@ def main() -> None:
     args = parser.parse_args()
 
     if not sys.stdin.isatty():
-        print_and_copy(generate_once(args), args.copy)
+        for _ in range(args.count):
+            print_and_copy(generate_once(args), args.copy)
         return
     
     print_custom_help(parser)
@@ -93,7 +108,8 @@ def main() -> None:
 
             changed = merge_inline_flags(line, args, parser)
             if not line or changed:
-                print_and_copy(generate_once(args), args.copy)
+                for _ in range(args.count):
+                    print_and_copy(generate_once(args), args.copy)
 
     except KeyboardInterrupt:
         pass
