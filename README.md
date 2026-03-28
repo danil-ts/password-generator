@@ -38,3 +38,4 @@ poetry run passgen
 | `-a,` `--amount`                    | сколько паролей сгенерировать                    # test
 # test2
 # test3
+# test4
